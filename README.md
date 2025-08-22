@@ -1,39 +1,49 @@
-# .
+#### Что должно уметь приложение
 
-This template should help get you started developing with Vue 3 in Vite.
+1. Добавление
 
-## Recommended IDE Setup
+    - Вверху — поле ввода и кнопка «Добавить».
+    - Нажатие добавляет объект { id, title, done: false } в массив tasks.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+2. Отметка выполненного
 
-## Type Support for `.vue` Imports in TS
+    - Каждый <Task> отображает чекбокс и текст задачи.
+    - Клик по чекбоксу меняет task.done (используйте передачу функции-обработчика через пропсы).
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+3. Счётчик оставшихся
 
-## Customize configuration
+    - Под списком выводится: «Осталось X из Y».
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+Должны быть задействованы следующие компоненты:
 
-## Project Setup
+1. App.svelte
+2. Task.svelte
+3. AddForm.svelte
+4. Counter.svelte
+5. Filter.svelte - отфильтровать все/незавершённые/завершённые
 
-```sh
-npm install
-```
+#### Доп. задание от 21.06.2025
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+1. Кнопка "Удалить завершённые"
+2. Возможность редактировать задачи (двойной клик по тексту - появляется поле ввода)
+3. Сделать поиск по задачам (рядом с фильтрами)
+4. Вынести логику в store
+5. Добавить сохранение в localStorage
+6. Сделать возможность назначать теги задачам (в тексте задачи пишем: "пойти погулять #трогать-траву")
+    1. Теги из задач появляются слева от списка задач
+    2. При нажатии на тег — фильтруем задачи по этому тегу
+7. Сделать скролл (если будет большое количество задачи)
+8. Виртуализация
+    1. Сделать виртуализацию списка задач без доп. библиотек (рендерятся только те задачи, которые видны пользователю)
+    2. Применить библиотеку для виртуализации
+    3. Вынести свою виртуализацию в библиотеку
+9. Связать всё это с сервером
+10. Сделать библиотеку UI-компонентов
+11. Сделать светлую/тёмную тему и кнопка переключения
+12. Dashboard - отдельная страничка
+    1. Добавляем виджет (можно установить поиск по слову, фильтр, тег)
+    2. Виджет можно редактировать или удалить
+    3. Можно добавлять любое кол-во виджетов
+    4. Drag and drop виджетов
+13. Подключить роутер, URL должен менять в зависимости от страницы (Dashboard, Tasks), а также должны менять query
+    параметры на странице Tasks (?filter=done&tag=home и так далее)
