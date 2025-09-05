@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AddForm from '@/components/AddForm.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, watchEffect } from 'vue'
 import type { Task } from '@/helpers/types.ts'
 
 const initialTasks = ref<Task[]>([
@@ -21,18 +21,40 @@ const initialTasks = ref<Task[]>([
   },
 ])
 
+const editableTaskId = ref<string | null>(null)
+
 const allTasksAmount = computed(() => initialTasks.value.length)
 const undoneTasksAmount = computed(() => initialTasks.value.filter((t) => t.done === false).length)
+const doneTasksAmount = computed(() => allTasksAmount.value - undoneTasksAmount.value)
 
-const updateTask = (id: string) => {
-  initialTasks.value = initialTasks.value.map((task) =>
-    task.id === id
-      ? {
-          ...task,
-          done: !task.done,
-        }
-      : task,
-  )
+watchEffect(() => {
+  console.log('doneTasksAmount:', doneTasksAmount.value)
+})
+
+console.log('undoneTasksAmount: ', undoneTasksAmount)
+
+// const updateTask = (id: string) => {
+//   // initialTasks.value.forEach((task) => {
+//   //   return task.id === id
+//   //       ?   {
+//   //         ...task,
+//   //         done: !task.done,
+//   //       }
+//   //       : task,
+//   // }
+//   // )
+//
+//   // todo: Очень важный момент. Если что-то может пойти не так, об этом нужно оповестить в консоли!
+//   const taskToUpdate = initialTasks.value.find((task) => task.id === id)
+//   if (!taskToUpdate) throw new Error('id not found')
+//
+//   taskToUpdate.done = !taskToUpdate.done
+// }
+
+const deleteCompletedTasks = () => {
+  initialTasks.value = initialTasks.value.filter((t) => !t.done)
+  // todo: вопрос. Почему не работает вариант без присваивания?
+  // initialTasks.value.map((t) => !t.done)
 }
 </script>
 
@@ -40,12 +62,19 @@ const updateTask = (id: string) => {
   <main>
     <AddForm v-model:tasks="initialTasks" />
     <ul>
-      <li v-for="todo in initialTasks" :key="todo.id">
-        <input type="checkbox" :id="todo.id" @change="updateTask(todo.id)" />
-        <label :for="todo.id">{{ todo.title }}</label>
-      </li>
+      <template v-for="todo in initialTasks" :key="todo.id">
+        <li v-if="editableTaskId !== todo.id">
+          <input type="checkbox" v-model="todo.done" />
+          <label @dblclick="editableTaskId = todo.id">{{ todo.title }}</label>
+        </li>
+        <li v-if="editableTaskId === todo.id">
+          <input type="text" v-model="todo.title" />
+          <button @click="editableTaskId = null">Сохранить</button>
+        </li>
+      </template>
     </ul>
     <span>Осталось {{ undoneTasksAmount }} из {{ allTasksAmount }}</span>
+    <button @click="deleteCompletedTasks">Удалить завершенные</button>
   </main>
 </template>
 

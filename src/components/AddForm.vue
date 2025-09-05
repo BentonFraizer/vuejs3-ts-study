@@ -1,28 +1,23 @@
 <script setup lang="ts">
 import { v4 as uuidv4 } from 'uuid'
 import { ref, watchEffect } from 'vue'
-import type { PropType } from 'vue'
 import type { Task } from '@/helpers/types.ts'
 
-const props = defineProps({
-  tasks: { type: Array as PropType<Task[]>, required: true },
-})
-const emit = defineEmits<{
-  (e: 'update:tasks', value: Task[]): void
-}>()
-
+const tasks = defineModel<Task[]>('tasks', { required: true })
 const text = ref('')
 
 function addTask() {
   if (!text.value) return
-  const newTask: Task = { id: uuidv4(), title: text.value, done: false }
-  emit('update:tasks', [...props.tasks, newTask]) // отправляем новый массив родителю
+  const newTask: Task = { id: uuidv4(), title: text.value, done: false, isEditMode: false }
+  // tasks.value = [newTask, ...tasks.value]
+  tasks.value.unshift(newTask)
   text.value = ''
 }
 
-watchEffect(() => {
-  console.log('text:', text.value)
-})
+// Пример просмотра данных в консоли
+// watchEffect(() => {
+//   console.log('text:', text.value)
+// })
 </script>
 
 <template>
