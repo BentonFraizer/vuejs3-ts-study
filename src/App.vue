@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import AddForm from '@/components/AddForm.vue'
-import { ref, computed, watchEffect } from 'vue'
+import { ref, computed, watchEffect, watch, reactive } from 'vue'
 import type { Task } from '@/helpers/types.ts'
+// todo: 3.3. Как импортировать именно Task.vue? Есть конфликт с наименованием типа Task
+import TaskComponent from './components/Task.vue'
 
-const initialTasks = ref<Task[]>([
+const tasks = ref<Task[]>([
   {
     id: '1',
     title: 'Прибухнуть',
@@ -21,20 +23,33 @@ const initialTasks = ref<Task[]>([
   },
 ])
 
-const editableTaskId = ref<string | null>(null)
+const searchValue = ref('')
 
-const allTasksAmount = computed(() => initialTasks.value.length)
-const undoneTasksAmount = computed(() => initialTasks.value.filter((t) => t.done === false).length)
+const searchedTasks = computed<Task[]>(() =>
+  tasks.value.filter((t) => t.title.toLowerCase().includes(searchValue.value.toLowerCase())),
+)
+
+const allTasksAmount = computed(() => tasks.value.length)
+const undoneTasksAmount = computed(() => tasks.value.filter((t) => t.done === false).length)
 const doneTasksAmount = computed(() => allTasksAmount.value - undoneTasksAmount.value)
 
 watchEffect(() => {
-  console.log('doneTasksAmount:', doneTasksAmount.value)
+  console.log('searchValue:', searchValue.value)
 })
+
+// const searchTasks = (searchValue: string) => {
+//   searchedTasks.value = tasks.value.filter((t) => t.title.includes(searchValue))
+// }
+
+// watchEffect(() => {
+//   console.log('tasks:', tasks.value)
+//   searchTasks(searchValue.value)
+// })
 
 console.log('undoneTasksAmount: ', undoneTasksAmount)
 
 // const updateTask = (id: string) => {
-//   // initialTasks.value.forEach((task) => {
+//   // tasks.value.forEach((task) => {
 //   //   return task.id === id
 //   //       ?   {
 //   //         ...task,
@@ -45,58 +60,57 @@ console.log('undoneTasksAmount: ', undoneTasksAmount)
 //   // )
 //
 //   // todo: Очень важный момент. Если что-то может пойти не так, об этом нужно оповестить в консоли!
-//   const taskToUpdate = initialTasks.value.find((task) => task.id === id)
+//   const taskToUpdate = tasks.value.find((task) => task.id === id)
 //   if (!taskToUpdate) throw new Error('id not found')
 //
 //   taskToUpdate.done = !taskToUpdate.done
 // }
 
 const deleteCompletedTasks = () => {
-  initialTasks.value = initialTasks.value.filter((t) => !t.done)
+  tasks.value = tasks.value.filter((t) => !t.done)
   // todo: вопрос. Почему не работает вариант без присваивания?
-  // initialTasks.value.map((t) => !t.done)
+  // tasks.value.map((t) => !t.done)
 }
 </script>
 
 <template>
   <main>
-    <AddForm v-model:tasks="initialTasks" />
+    <h2 style="margin-bottom: 15px">Список задач</h2>
+    <AddForm v-model:tasks="tasks" />
     <ul>
-      <template v-for="todo in initialTasks" :key="todo.id">
-        <li v-if="editableTaskId !== todo.id">
-          <input type="checkbox" v-model="todo.done" />
-          <label @dblclick="editableTaskId = todo.id">{{ todo.title }}</label>
-        </li>
-        <li v-if="editableTaskId === todo.id">
-          <input type="text" v-model="todo.title" />
-          <button @click="editableTaskId = null">Сохранить</button>
-        </li>
-      </template>
+      <TaskComponent v-model:tasks="searchedTasks" />
     </ul>
     <span>Осталось {{ undoneTasksAmount }} из {{ allTasksAmount }}</span>
-    <button @click="deleteCompletedTasks">Удалить завершенные</button>
+    <button @click="deleteCompletedTasks" class="delete-finished">Удалить завершенные</button>
+
+    <div class="search">
+      <label for="search">Поиск по задачам: </label>
+      <input id="search" type="search" v-model="searchValue" />
+    </div>
   </main>
 </template>
 
 <style scoped>
 main {
+  padding: 30px 40px 40px;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh;
   align-items: center;
   justify-content: center;
+  border: 1px solid slateblue;
+  border-radius: 1rem;
 }
 
-li {
-  list-style: none;
+.delete-finished {
+  margin-bottom: 15px;
 }
 
-input {
+.search {
+  display: flex;
+}
+
+.search label {
   margin-right: 10px;
-}
-
-input:checked + label {
-  text-decoration: line-through;
 }
 </style>
