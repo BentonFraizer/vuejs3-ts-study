@@ -8,7 +8,7 @@ const text = ref('')
 
 function addTask() {
   if (!text.value) return
-  const newTask: Task = { id: uuidv4(), title: text.value, done: false, isEditMode: false }
+  const newTask: Task = { id: uuidv4(), title: text.value, done: false }
   // tasks.value = [newTask, ...tasks.value]
   tasks.value.unshift(newTask)
   text.value = ''
