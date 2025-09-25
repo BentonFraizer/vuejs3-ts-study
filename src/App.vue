@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import AddForm from '@/components/AddForm.vue'
-import { ref, computed, watchEffect, watch, reactive } from 'vue'
-import type { Task } from '@/helpers/types.ts'
+import { storeToRefs } from 'pinia'
 // todo: 3.3. Как импортировать именно Task.vue? Есть конфликт с наименованием типа Task
 import TaskComponent from './components/Task.vue'
+import { useTasksStore } from '@/stores/tasks.ts'
 
-const tasks = ref<Task[]>([
+const tasksStore = useTasksStore()
+
+const { searchValue, statusFilter, allTasksAmount, undoneTasksAmount } = storeToRefs(tasksStore)
+
+const { deleteCompletedTasks } = tasksStore
+
+tasksStore.tasks = [
   {
     id: '1',
     title: 'Прибухнуть',
@@ -21,64 +27,25 @@ const tasks = ref<Task[]>([
     title: 'Выспаться',
     done: false,
   },
-])
-
-const searchValue = ref('')
-
-const searchedTasks = computed<Task[]>(() =>
-  tasks.value.filter((t) => t.title.toLowerCase().includes(searchValue.value.toLowerCase())),
-)
-
-const allTasksAmount = computed(() => tasks.value.length)
-const undoneTasksAmount = computed(() => tasks.value.filter((t) => t.done === false).length)
-const doneTasksAmount = computed(() => allTasksAmount.value - undoneTasksAmount.value)
-
-watchEffect(() => {
-  console.log('searchValue:', searchValue.value)
-})
-
-// const searchTasks = (searchValue: string) => {
-//   searchedTasks.value = tasks.value.filter((t) => t.title.includes(searchValue))
-// }
-
-// watchEffect(() => {
-//   console.log('tasks:', tasks.value)
-//   searchTasks(searchValue.value)
-// })
-
-console.log('undoneTasksAmount: ', undoneTasksAmount)
-
-// const updateTask = (id: string) => {
-//   // tasks.value.forEach((task) => {
-//   //   return task.id === id
-//   //       ?   {
-//   //         ...task,
-//   //         done: !task.done,
-//   //       }
-//   //       : task,
-//   // }
-//   // )
-//
-//   // todo: Очень важный момент. Если что-то может пойти не так, об этом нужно оповестить в консоли!
-//   const taskToUpdate = tasks.value.find((task) => task.id === id)
-//   if (!taskToUpdate) throw new Error('id not found')
-//
-//   taskToUpdate.done = !taskToUpdate.done
-// }
-
-const deleteCompletedTasks = () => {
-  tasks.value = tasks.value.filter((t) => !t.done)
-  // todo: вопрос. Почему не работает вариант без присваивания?
-  // tasks.value.map((t) => !t.done)
-}
+  {
+    id: '4',
+    title: 'Выполненная задача',
+    done: true,
+  },
+  {
+    id: '5',
+    title: 'Готовая задача',
+    done: true,
+  },
+]
 </script>
 
 <template>
   <main>
     <h2 style="margin-bottom: 15px">Список задач</h2>
-    <AddForm v-model:tasks="tasks" />
+    <AddForm />
     <ul>
-      <TaskComponent v-model:tasks="searchedTasks" />
+      <TaskComponent />
     </ul>
     <span>Осталось {{ undoneTasksAmount }} из {{ allTasksAmount }}</span>
     <button @click="deleteCompletedTasks" class="delete-finished">Удалить завершенные</button>
@@ -87,6 +54,16 @@ const deleteCompletedTasks = () => {
       <label for="search">Поиск по задачам: </label>
       <input id="search" type="search" v-model="searchValue" />
     </div>
+    <fieldset>
+      <input type="radio" id="all" name="status" value="all" v-model="statusFilter" />
+      <label for="all">all</label><br />
+
+      <input type="radio" id="done" name="status" value="done" v-model="statusFilter" />
+      <label for="done">done</label><br />
+
+      <input type="radio" id="undone" name="status" value="undone" v-model="statusFilter" />
+      <label for="undone">undone</label>
+    </fieldset>
   </main>
 </template>
 
@@ -111,6 +88,10 @@ main {
 }
 
 .search label {
+  margin-right: 10px;
+}
+
+fieldset > input {
   margin-right: 10px;
 }
 </style>

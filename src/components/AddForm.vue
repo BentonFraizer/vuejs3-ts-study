@@ -2,27 +2,27 @@
 import { v4 as uuidv4 } from 'uuid'
 import { ref, watchEffect } from 'vue'
 import type { Task } from '@/helpers/types.ts'
+import { useTasksStore } from '@/stores/tasks.ts'
 
-const tasks = defineModel<Task[]>('tasks', { required: true })
-const text = ref('')
+const tasksStore = useTasksStore()
 
-function addTask() {
-  if (!text.value) return
-  const newTask: Task = { id: uuidv4(), title: text.value, done: false }
-  // tasks.value = [newTask, ...tasks.value]
-  tasks.value.unshift(newTask)
-  text.value = ''
-}
+const newTaskTitle = ref('')
+const { addTask } = tasksStore
 
 // Пример просмотра данных в консоли
 // watchEffect(() => {
 //   console.log('text:', text.value)
 // })
+
+const handleAddTask = () => {
+  addTask(newTaskTitle.value)
+  newTaskTitle.value = ''
+}
 </script>
 
 <template>
-  <form @submit.prevent="addTask">
-    <input v-model="text" />
+  <form @submit.prevent="handleAddTask">
+    <input v-model="newTaskTitle" />
     <button type="submit">Создать задачу</button>
   </form>
 </template>
