@@ -1,21 +1,18 @@
 <script setup lang="ts">
 import { ref, reactive, watchEffect } from 'vue'
-import type { Task } from '@/helpers/types.ts'
+import { useTasksStore } from '@/stores/tasks.ts'
 
-const tasks = defineModel<Task[]>('tasks', { required: true })
-
+const tasksStore = useTasksStore()
 const editableTaskId = ref<string | null>(null)
 
-// todo: 3.2. Как посмотреть значения внутри пропс? Чтобы увидеть именно массив, а не Proxy что-то там...
-// или просто надо смотреть внутрь <target> ?
 watchEffect(() => {
-  console.log('tasks ----->', tasks.value)
+  console.log('1. tasksStore.searchedTasks ----->', tasksStore.searchedTasks)
 })
 </script>
 
-<!--todo: 3.1. По ходу нельзя навесить v-for на template-->
+<!--todo: Нельзя навесить v-for на template-->
 <template>
-  <li v-for="todo in tasks" :key="todo.id">
+  <li v-for="todo in tasksStore.filteredTasks" :key="todo.id">
     <template v-if="editableTaskId !== todo.id">
       <input type="checkbox" v-model="todo.done" />
       <label @dblclick="editableTaskId = todo.id">{{ todo.title }}</label>
